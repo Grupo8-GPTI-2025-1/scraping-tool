@@ -39,18 +39,43 @@ class Driver:
         self.driver.quit()
         self.driver = None
 
+class PortalInmobiliarioScraper:
+    def __init__(self):
+        self.link = 'https://www.portalinmobiliario.com/venta/departamento'
+        self.driver = Driver()
+        self.driver.initialize_driver()
+
+    def load_page(self, id: str) -> None:
+        self.driver.load_page(self.link + id)
+
+    def get_links(self) -> list:
+        self.load_page(self.link)
+        data = self.driver.find_element(By.CLASS_NAME, 'ui-search-results')
+        datos = data.find_elements(By.CLASS_NAME, 'ui-search-layout__item')
+        print(f"Total de elementos encontrados: {len(datos)}")
+        billboard_links = []
+        for dato in datos:
+            try:
+                link_elem = dato.find_element(By.XPATH, ".//a[contains(@class, 'poly-component__badge poly-component__badge--image poly-component__link')]")
+                href = link_elem.get_attribute("href")
+                billboard_links.append(href)
+            except Exception as e:
+                print(f"Error: {e}")
+                continue
+        print(billboard_links)
+        return billboard_links
+
+
+    def close(self) -> None:
+        self.driver.close()
+
 
 print("hello world")
 
 if __name__ == '__main__':
-    chrome = Driver()
-    chrome.initialize_driver()
-    id = 'MLC-1578330077-departamento-en-venta-de-3-dorm-en-las-condes'
-    chrome.load_page(f'https://www.portalinmobiliario.com/{id}')
-    texto = input()
-    data = chrome.find_element(By.CLASS_NAME, 'ui-pdp--sticky-wrapper')
-    nombre = data.find_element(By.CLASS_NAME, 'ui-pdp-header__title-container')
-    print(nombre.get_attribute('textContent'))
+    scraper = PortalInmobiliarioScraper()
+    scraper.get_links()
+    scraper.close()
     sleep(5)
 
 
