@@ -78,7 +78,7 @@ class PortalInmobiliarioScraper(Driver):
         }
     
     def get_links(self) -> list:
-        self.load_page(self.links_depto)
+        self.load_page(self.depto_links)
         data = self.find_element(By.CLASS_NAME, 'ui-search-results')
         datos = data.find_elements(By.CLASS_NAME, 'ui-search-layout__item')
         print(f"Total de elementos encontrados: {len(datos)}")
