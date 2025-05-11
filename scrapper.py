@@ -45,7 +45,7 @@ print("hello world")
 if __name__ == '__main__':
     chrome = Driver()
     chrome.initialize_driver()
-    id = 'MLC-1572258037-departamento-en-venta-de-3-dorm-en-las-condes-_JM'
+    id = 'MLC-1578330077-departamento-en-venta-de-3-dorm-en-las-condes'
     chrome.load_page(f'https://www.portalinmobiliario.com/{id}')
     texto = input()
     data = chrome.find_element(By.CLASS_NAME, 'ui-pdp--sticky-wrapper')
