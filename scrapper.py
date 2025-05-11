@@ -47,7 +47,7 @@ class PortalInmobiliarioScraper(Driver):
         self.link = 'https://www.portalinmobiliario.com'
         self.depto_links = 'https://www.portalinmobiliario.com/venta/departamento'
 
-    def get_title(self) -> WebElement:
+    def get_title(self) -> str:
         value = "//div[@class='ui-pdp-header__title-container']"
         elemento = self.find_element(By.XPATH, value)
         return elemento.get_attribute('textContent').strip('Agregar a favoritos')
@@ -58,7 +58,7 @@ class PortalInmobiliarioScraper(Driver):
         element = self.find_element(By.XPATH, value)
         return element.find_element(By.XPATH, value_t).get_attribute('textContent')
     
-    def get_price(self) -> WebElement:
+    def get_price(self) -> str:
         return self.driver.find_element(By.ID, 'price').get_attribute('textContent')
     
     def get_location(self) -> str:
