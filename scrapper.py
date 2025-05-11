@@ -42,7 +42,7 @@ class Driver:
 
 class PortalInmobiliarioScraper(Driver):
     def __init__(self):
-        super().__init__(self)
+        super().__init__()
         self.initialize_driver()
         self.link = 'https://www.portalinmobiliario.com'
         self.depto_links = 'https://www.portalinmobiliario.com/venta/departamento'
@@ -102,4 +102,5 @@ if __name__ == '__main__':
     scraper = PortalInmobiliarioScraper()
     data = scraper.get_data(offer)
     print(data)
+    #scraper.get_links()
     scraper.close()
