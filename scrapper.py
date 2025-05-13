@@ -30,6 +30,9 @@ class Driver:
 
     def find_element(self, by: str, xpath: str) -> WebElement:
         return self.driver.find_element(by=by, value=xpath)
+        
+    def find_elements(self, by: str, xpath: str):
+        return self.driver.find_elements(by=by, value=xpath)
     
     def scroll_to_element(self, element):
         self.driver.execute_script("arguments[0].scrollIntoView(true);", element)
@@ -38,6 +41,7 @@ class Driver:
     def close(self) -> None:
         self.driver.quit()
         self.driver = None
+
 
 
 class PortalInmobiliarioScraper(Driver):
@@ -93,14 +97,62 @@ class PortalInmobiliarioScraper(Driver):
                 continue
         print(billboard_links)
         return billboard_links
+    
 
+
+class AirbnbScraper(Driver):
+    def __init__(self):
+        super().__init__()
+        self.initialize_driver()
+        self.link = 'https://www.airbnb.cl/'
+        self.depto_links = None
+
+    def get_title(self) -> str:
+        value = "//div[@data-section-id='TITLE_DEFAULT']" 
+        titulo = self.find_element(By.XPATH, value)
+        #titulo = elemento.find_element(By.XPATH, "//h2[@tabindex='1']")
+        return titulo.get_attribute('textContent').strip('CompartirGuardar')
+    
+    def details(self) -> str:
+        value = '/*[@data-section-id="OVERVIEW_DEFAULT_V2"]'
+        overview = self.find_element(By.XPATH, value)#.find_element(By.TAG_NAME, 'ol')
+        elements = overview.get_attribute('textContent')#find_elements(By.TAG_NAME, "li")
+        print(elements)
+        # value_g = f"//*[contains(text(), 'sped')]" 
+        # value_h = f"//*[contains(text(), 'habitaci')]"
+        # value_c = f"//*[contains(text(), 'cama')]"
+        # value_b = f"//*[contains(text(), 'baño')]"/html/body/div[5]/div/div/div[1]/div/div/div[1]/div/div/div/div[1]/main/div/div[1]/div[3]/div/div[1]/div/div[1]
+        # details = {
+        #     'guests'    : overview.find_element(By.XPATH, value_g),
+        #     'rooms'     : overview.find_element(By.XPATH, value_h).get_attribute('textContent'),
+        #     'bathrooms' : overview.find_element(By.XPATH, value_c).get_attribute('textContent'),
+        #     'beds'      : overview.find_element(By.XPATH, value_b)
+        # }
+        # return details
+        return elements
+
+    
+    def get_data(self, link:str) -> dict:
+        self.load_page(link)
+        #detalles = self.details()  # con errores
+        return {
+            'name'      : self.get_title(),
+            'type'      : 'departamento',
+            # 'rooms'     : detalles['rooms'], 
+            # 'bathrooms' : detalles['bathrooms']
+            # 'price'     : self.get_price(),
+            # 'location'  : self.get_location(),
+            # 'url'       : link.split('#')[0]
+        }
 
 
 if __name__ == '__main__':
     print('Scrap de una oferta ')
-    offer = input('Link: ')
-    scraper = PortalInmobiliarioScraper()
-    data = scraper.get_data(offer)
+    offer = 'https://www.airbnb.cl/rooms/1373272437807452894' #input('Link: ') # 
+    # scraper_p = PortalInmobiliarioScraper()
+    scraper_a = AirbnbScraper()
+    data = scraper_a.get_data(offer)
+    # data = scraper_p.get_data(offer)
     print(data)
     #scraper.get_links()
-    scraper.close()
+    scraper_a.close()
