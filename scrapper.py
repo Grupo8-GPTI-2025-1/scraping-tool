@@ -17,7 +17,7 @@ class Driver:
 
     def load_page(self, page: str) -> None:
         self.driver.get(page)
-        sleep(5)
+        #sleep(2)
 
     def click_element(self, by: str, xpath: str) -> None:
         sleep(1)
@@ -40,21 +40,67 @@ class Driver:
         self.driver = None
 
 
-print("hello world")
+class PortalInmobiliarioScraper(Driver):
+    def __init__(self):
+        super().__init__()
+        self.initialize_driver()
+        self.link = 'https://www.portalinmobiliario.com'
+        self.depto_links = 'https://www.portalinmobiliario.com/venta/departamento'
+
+    def get_title(self) -> str:
+        value = "//div[@class='ui-pdp-header__title-container']"
+        elemento = self.find_element(By.XPATH, value)
+        return elemento.get_attribute('textContent').strip('Agregar a favoritos')
+    
+    def get_rooms(self, tipo='dormitorios') -> str:
+        value = f"//div[@class='ui-pdp-highlighted-specs-res']"
+        value_t = f"//span[contains(text(), '{tipo}')]"
+        element = self.find_element(By.XPATH, value)
+        return element.find_element(By.XPATH, value_t).get_attribute('textContent')
+    
+    def get_price(self) -> str:
+        return self.driver.find_element(By.ID, 'price').get_attribute('textContent')
+    
+    def get_location(self) -> str:
+        element = self.find_element(By.CLASS_NAME, 'ui-vip-location__subtitle')
+        return element.get_attribute('textContent').strip('Ver información de la zona')
+
+    def get_data(self, link:str) -> dict:
+        self.load_page(link)
+        return {
+            'name'      : self.get_title(),
+            'type'      : 'departamento',
+            'rooms'     : self.get_rooms('dormitorios'), 
+            'bathrooms' : self.get_rooms('baños'),
+            'price'     : self.get_price(),
+            'location'  : self.get_location(),
+            'url'       : link.split('#')[0]
+        }
+    
+    def get_links(self) -> list:
+        self.load_page(self.depto_links)
+        data = self.find_element(By.CLASS_NAME, 'ui-search-results')
+        datos = data.find_elements(By.CLASS_NAME, 'ui-search-layout__item')
+        print(f"Total de elementos encontrados: {len(datos)}")
+        billboard_links = []
+        for dato in datos:
+            try:
+                link_elem = dato.find_element(By.XPATH, ".//a[contains(@class, 'poly-component__badge poly-component__badge--image poly-component__link')]")
+                href = link_elem.get_attribute("href")
+                billboard_links.append(href)
+            except Exception as e:
+                print(f"Error: {e}")
+                continue
+        print(billboard_links)
+        return billboard_links
+
+
 
 if __name__ == '__main__':
-    chrome = Driver()
-    chrome.initialize_driver()
-    id = 'MLC-1578330077-departamento-en-venta-de-3-dorm-en-las-condes'
-    chrome.load_page(f'https://www.portalinmobiliario.com/{id}')
-    texto = input()
-    data = chrome.find_element(By.CLASS_NAME, 'ui-pdp--sticky-wrapper')
-    nombre = data.find_element(By.CLASS_NAME, 'ui-pdp-header__title-container')
-    print(nombre.get_attribute('textContent'))
-    sleep(5)
-
-
-#https://www.airbnb.cl/?refinement_paths%5B%5D=%2Fhomes&
-#search_mode=flex_destinations_search&flexible_trip_lengths%5B%5D=one_week&location_search=MIN_MAP_BOUNDS&monthly_start_date=2025-06-01&monthly_length=3&monthly_end_date=2025-09-01&category_tag=Tag%3A789&price_filter_input_type=2&channel=EXPLORE&room_types%5B%5D=Entire%20home%2Fapt&selected_filter_order%5B%5D=room_types%3AEntire%20home%2Fapt&selected_filter_order%5B%5D=min_bedrooms%3A3&selected_filter_order%5B%5D=min_beds%3A1&selected_filter_order%5B%5D=min_bathrooms%3A3&update_selected_filters=false&search_type=filter_change&min_bedrooms=3&min_beds=0&min_bathrooms=3
-
-#https://www.airbnb.cl/s/Barrio-El-Golf--Las-Condes/homes?refinement_paths%5B%5D=%2Fhomes&flexible_trip_lengths%5B%5D=one_week&monthly_start_date=2025-06-01&monthly_length=3&monthly_end_date=2025-09-01&price_filter_input_type=2&channel=EXPLORE&update_selected_filters=false&search_type=filter_change&price_filter_num_nights=5&place_id=ChIJcR_7EjzPYpYRwJzYztmtag8&acp_id=t-g-ChIJcR_7EjzPYpYRwJzYztmtag8&date_picker_type=calendar&query=Barrio%20El%20Golf%2C%20Las%20Condes&search_mode=regular_search&room_types%5B%5D=Entire%20home%2Fapt&selected_filter_order%5B%5D=room_types%3AEntire%20home%2Fapt&selected_filter_order%5B%5D=min_bedrooms%3A3&selected_filter_order%5B%5D=min_bathrooms%3A3&min_bedrooms=3&min_bathrooms=3
+    print('Scrap de una oferta ')
+    offer = input('Link: ')
+    scraper = PortalInmobiliarioScraper()
+    data = scraper.get_data(offer)
+    print(data)
+    #scraper.get_links()
+    scraper.close()
