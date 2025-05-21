@@ -123,10 +123,6 @@ class AirbnbScraper(Driver):
         except Exception as e:
             print(f"[ERROR get_price]: {e}")
             return "Error al obtener precio"
-    
-    def get_location(self) -> str:
-        element = self.find_element(By.CLASS_NAME, 'ui-vip-location__subtitle')
-        return element.get_attribute('textContent').strip('Ver información de la zona')
 
     def get_data(self, link:str) -> dict:
         self.load_page(link)
