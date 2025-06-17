@@ -101,7 +101,6 @@ class AirbnbScraper(Driver):
         super().__init__()
         self.initialize_driver()
         self.link = 'https://www.airbnb.cl'
-        self.depto_links = 'https://www.airbnb.cl//s/Santiago-de-Chile--Santiago/homes?refinement_paths%5B%5D=%2Fhomes&acp_id=t-g-ChIJBaYeX77FYpYREEZwTeVOE_A&date_picker_type=calendar&source=structured_search_input_header&search_type=user_map_move&flexible_trip_lengths%5B%5D=one_week&monthly_start_date=2025-06-01&monthly_length=3&monthly_end_date=2025-09-01&price_filter_input_type=2&channel=EXPLORE&place_id=ChIJBaYeX77FYpYREEZwTeVOE_A&query=Santiago%20de%20Chile%2C%20Santiago&search_mode=regular_search&price_filter_num_nights=5&ne_lat=-33.310872118077114&ne_lng=-70.53990055531199&sw_lat=-33.58297011852006&sw_lng=-70.79099137470294&zoom=10.99720104082905&zoom_level=10.99720104082905&search_by_map=true'
 
     def get_title(self) -> str:
         value = self.driver.find_element(By.XPATH, "//h1").text.strip()
@@ -167,10 +166,10 @@ class AirbnbScraper(Driver):
 
 
 if __name__ == '__main__':
-    print('Scrap de una oferta ')
+    print('Scrap de 2 ofertas Airbnb')
     scraper = AirbnbScraper()
-    data = scraper.get_data("https://www.airbnb.cl/rooms/1296471826558499503?search_mode=regular_search&adults=1&check_in=2025-05-26&check_out=2025-05-31&children=0&infants=0&pets=0&source_impression_id=p3_1747844899_P3tnZeHe4c7p52G7&previous_page_section_name=1000&federated_search_id=db2785f1-768e-404c-a79a-f8b06853e22f")
+    data = scraper.get_data(str(input()))
     print(data)
-    data = scraper.get_data("https://www.airbnb.cl/rooms/1330590650199610252?search_mode=regular_search&adults=1&check_in=2025-05-21&check_out=2025-05-26&children=0&infants=0&pets=0&source_impression_id=p3_1747843939_P3JmVfVudOA9huWX&previous_page_section_name=1000&federated_search_id=3737772c-479b-4fcf-a032-39fa30acbdc0")
+    data = scraper.get_data(str(input()))
     print(data)
     scraper.close()
