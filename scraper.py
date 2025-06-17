@@ -61,7 +61,8 @@ class PortalInmobiliarioScraper(Driver):
         return element.find_element(By.XPATH, value_t).get_attribute('textContent')
     
     def get_price(self) -> str:
-        return self.driver.find_element(By.ID, 'price').get_attribute('textContent')
+        return self.driver.find_element(By.ID, 'price').get_attribute('textContent').split('$')[1]
+
     
     def get_location(self) -> str:
         element = self.find_element(By.CLASS_NAME, 'ui-vip-location__subtitle')
@@ -93,8 +94,15 @@ class PortalInmobiliarioScraper(Driver):
             except Exception as e:
                 print(f"Error: {e}")
                 continue
-        print(billboard_links)
         return billboard_links
+    
+    def get_all_data(self) -> list:
+        links = self.get_links()
+        all_data = []
+        for link in links:
+            data = self.get_data(link)
+            all_data.append(data)
+        return all_data
 
 class AirbnbScraper(Driver):
     def __init__(self):
@@ -109,7 +117,7 @@ class AirbnbScraper(Driver):
                 
     def get_price(self) -> str:
         try:
-            wait = WebDriverWait(self.driver, 20)
+            wait = WebDriverWait(self.driver, 30)
             # Espera un span que contenga 'CLP' dentro de un botón
             spans = wait.until(EC.presence_of_all_elements_located((
                 By.XPATH, "//button//span[contains(text(), 'CLP')]"
@@ -117,12 +125,25 @@ class AirbnbScraper(Driver):
             
             for i, span in enumerate(spans):
                 if span.text and "CLP" in span.text:
-                    return span.text.strip()
+                    if span.text.strip() == "CLP":
+                        return "Precio no encontrado"
+                    return span.text.strip().strip("CLP").strip("$").replace(',', '.')              
 
             return "Precio no encontrado"
         except Exception as e:
             print(f"[ERROR get_price]: {e}")
             return "Error al obtener precio"
+        
+    def find_rooms_and_bathrooms(self, item: WebElement) -> tuple:
+        habitaciones = '1 habitación'
+        baños = 'compartido'
+        for i in item:
+            if 'habitaci' in i.text.lower():
+                habitaciones = i.text.strip("· ")
+            elif 'baño' in i.text.lower():
+                baños = i.text.strip("· ")
+        return habitaciones, baños
+
 
     def get_data(self, link:str) -> dict:
         self.load_page(link)
@@ -133,13 +154,7 @@ class AirbnbScraper(Driver):
         )))
 
         resumen = self.driver.find_elements(By.XPATH, "//li[contains(@class, 'l7n4lsf')]")
-
-        for item in resumen:
-            if "habitaci" in item.text.lower():
-                habitaciones = item.text.split(' ')[2]
-
-            if "baño" in item.text.lower():
-                baños = item.text.split(' ')[2]
+        habitaciones, baños = self.find_rooms_and_bathrooms(resumen)
 
         return {
             'name'      : self.get_title(),
@@ -152,25 +167,47 @@ class AirbnbScraper(Driver):
     
     def get_links(self) -> list:
         self.load_page(self.depto_links)
-        datos = self.driver.find_elements(By.XPATH, "//a[contains(@href, '/rooms/')]")
-        print(f"Total de elementos encontrados: {len(datos)}")
-        billboard_links = []
-        for dato in datos:
-            try:
-                href = dato.get_attribute("href")
-                billboard_links.append(href)
-            except Exception as e:
-                print(f"Error: {e}")
-                continue
-        print(billboard_links)
+        wait = WebDriverWait(self.driver, 30)
+
+        SCROLL_PAUSE_TIME = 2
+        last_height = self.driver.execute_script("return document.body.scrollHeight")
+        links_set = set()
+
+        while True:
+            # Scroll hacia abajo
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            sleep(SCROLL_PAUSE_TIME)
+
+            # Obtener todos los elementos tipo /rooms/
+            elems = self.driver.find_elements(By.XPATH, "//a[contains(@href, '/rooms/')]")
+            for elem in elems:
+                href = elem.get_attribute("href")
+                if href and "/rooms/" in href:
+                    links_set.add(href)  # limpia parámetros
+
+            # Verificar si ya no hay más scroll
+            new_height = self.driver.execute_script("return document.body.scrollHeight")
+            if new_height == last_height:
+                break
+            last_height = new_height
+
+        billboard_links = list(links_set)
+        print(f"Total de links encontrados: {len(billboard_links)}")
         return billboard_links
+    
+    def get_all_data(self) -> list:
+        links = self.get_links()
+        all_data = []
+        for link in links:
+            data = self.get_data(link)
+            all_data.append(data)
+        return all_data
 
 
 if __name__ == '__main__':
-    print('Scrap de 2 ofertas Airbnb')
-    scraper = AirbnbScraper()
-    data = scraper.get_data(str(input()))
-    print(data)
-    data = scraper.get_data(str(input()))
-    print(data)
+    print('Scrap de una oferta ')
+    scraper = PortalInmobiliarioScraper()
+    all_data_portal = scraper.get_all_data()
+    print(all_data_portal)
+
     scraper.close()
