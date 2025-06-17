@@ -167,10 +167,10 @@ class AirbnbScraper(Driver):
 
 
 if __name__ == '__main__':
-    print('Scrap de una oferta ')
+    print('Scrap de 2 ofertas Airbnb')
     scraper = AirbnbScraper()
-    data = scraper.get_data("https://www.airbnb.cl/rooms/1296471826558499503?search_mode=regular_search&adults=1&check_in=2025-05-26&check_out=2025-05-31&children=0&infants=0&pets=0&source_impression_id=p3_1747844899_P3tnZeHe4c7p52G7&previous_page_section_name=1000&federated_search_id=db2785f1-768e-404c-a79a-f8b06853e22f")
+    data = scraper.get_data(str(input()))
     print(data)
-    data = scraper.get_data("https://www.airbnb.cl/rooms/1330590650199610252?search_mode=regular_search&adults=1&check_in=2025-05-21&check_out=2025-05-26&children=0&infants=0&pets=0&source_impression_id=p3_1747843939_P3JmVfVudOA9huWX&previous_page_section_name=1000&federated_search_id=3737772c-479b-4fcf-a032-39fa30acbdc0")
+    data = scraper.get_data(str(input()))
     print(data)
     scraper.close()
