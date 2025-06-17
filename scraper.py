@@ -62,6 +62,7 @@ class PortalInmobiliarioScraper(Driver):
     
     def get_price(self) -> str:
         return self.driver.find_element(By.ID, 'price').get_attribute('textContent').split('$')[1]
+
     
     def get_location(self) -> str:
         element = self.find_element(By.CLASS_NAME, 'ui-vip-location__subtitle')
@@ -126,8 +127,7 @@ class AirbnbScraper(Driver):
                 if span.text and "CLP" in span.text:
                     if span.text.strip() == "CLP":
                         return "Precio no encontrado"
-                    return span.text.strip().strip("CLP").strip("$").replace(',', '.')
-                
+                    return span.text.strip().strip("CLP").strip("$").replace(',', '.')              
 
             return "Precio no encontrado"
         except Exception as e:
@@ -143,6 +143,7 @@ class AirbnbScraper(Driver):
             elif 'baño' in i.text.lower():
                 baños = i.text.strip("· ")
         return habitaciones, baños
+
 
     def get_data(self, link:str) -> dict:
         self.load_page(link)
@@ -208,4 +209,5 @@ if __name__ == '__main__':
     scraper = PortalInmobiliarioScraper()
     all_data_portal = scraper.get_all_data()
     print(all_data_portal)
+
     scraper.close()
