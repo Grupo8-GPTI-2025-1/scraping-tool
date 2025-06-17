@@ -61,7 +61,7 @@ class PortalInmobiliarioScraper(Driver):
         return element.find_element(By.XPATH, value_t).get_attribute('textContent')
     
     def get_price(self) -> str:
-        return self.driver.find_element(By.ID, 'price').get_attribute('textContent')
+        return self.driver.find_element(By.ID, 'price').get_attribute('textContent').split('$')[1]
     
     def get_location(self) -> str:
         element = self.find_element(By.CLASS_NAME, 'ui-vip-location__subtitle')
@@ -203,7 +203,7 @@ class AirbnbScraper(Driver):
 
 if __name__ == '__main__':
     print('Scrap de una oferta ')
-    scraper = AirbnbScraper()
-    all_data_airbnb = scraper.get_all_data()
-    print(all_data_airbnb)
+    scraper = PortalInmobiliarioScraper()
+    all_data_portal = scraper.get_all_data()
+    print(all_data_portal)
     scraper.close()
