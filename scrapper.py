@@ -93,7 +93,6 @@ class PortalInmobiliarioScraper(Driver):
             except Exception as e:
                 print(f"Error: {e}")
                 continue
-        print(billboard_links)
         return billboard_links
     
     def get_all_data(self) -> list:
@@ -127,7 +126,7 @@ class AirbnbScraper(Driver):
                 if span.text and "CLP" in span.text:
                     if span.text.strip() == "CLP":
                         return "Precio no encontrado"
-                    return span.text.strip()
+                    return span.text.strip().strip("CLP").strip("$").replace(',', '.')
                 
 
             return "Precio no encontrado"
@@ -206,7 +205,7 @@ class AirbnbScraper(Driver):
 
 if __name__ == '__main__':
     print('Scrap de una oferta ')
-    scraper = AirbnbScraper()
+    scraper = PortalInmobiliarioScraper()
     all_data_portal = scraper.get_all_data()
     print(all_data_portal)
     scraper.close()
