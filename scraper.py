@@ -101,6 +101,7 @@ class AirbnbScraper(Driver):
         super().__init__()
         self.initialize_driver()
         self.link = 'https://www.airbnb.cl'
+        self.depto_links = 'https://www.airbnb.cl//s/Santiago-de-Chile--Santiago/homes?refinement_paths%5B%5D=%2Fhomes&acp_id=t-g-ChIJBaYeX77FYpYREEZwTeVOE_A&date_picker_type=calendar&source=structured_search_input_header&search_type=user_map_move&flexible_trip_lengths%5B%5D=one_week&monthly_start_date=2025-06-01&monthly_length=3&monthly_end_date=2025-09-01&price_filter_input_type=2&channel=EXPLORE&place_id=ChIJBaYeX77FYpYREEZwTeVOE_A&query=Santiago%20de%20Chile%2C%20Santiago&search_mode=regular_search&price_filter_num_nights=5&ne_lat=-33.310872118077114&ne_lng=-70.53990055531199&sw_lat=-33.58297011852006&sw_lng=-70.79099137470294&zoom=10.99720104082905&zoom_level=10.99720104082905&search_by_map=true'
 
     def get_title(self) -> str:
         value = self.driver.find_element(By.XPATH, "//h1").text.strip()
