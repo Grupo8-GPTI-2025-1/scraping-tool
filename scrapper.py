@@ -95,6 +95,14 @@ class PortalInmobiliarioScraper(Driver):
                 continue
         print(billboard_links)
         return billboard_links
+    
+    def get_all_data(self) -> list:
+        links = self.get_links()
+        all_data = []
+        for link in links:
+            data = self.get_data(link)
+            all_data.append(data)
+        return all_data
 
 class AirbnbScraper(Driver):
     def __init__(self):
@@ -123,6 +131,16 @@ class AirbnbScraper(Driver):
         except Exception as e:
             print(f"[ERROR get_price]: {e}")
             return "Error al obtener precio"
+        
+    def find_rooms_and_bathrooms(self, item: WebElement) -> tuple:
+        habitaciones = '1 habitación'
+        baños = 'compartido'
+        for i in item:
+            if 'habitaci' in i.text.lower():
+                habitaciones = i.text.strip("· ")
+            elif 'baño' in i.text.lower():
+                baños = i.text.strip("· ")
+        return habitaciones, baños
 
     def get_data(self, link:str) -> dict:
         self.load_page(link)
@@ -133,13 +151,7 @@ class AirbnbScraper(Driver):
         )))
 
         resumen = self.driver.find_elements(By.XPATH, "//li[contains(@class, 'l7n4lsf')]")
-
-        for item in resumen:
-            if "habitaci" in item.text.lower():
-                habitaciones = item.text.split(' ')[2]
-
-            if "baño" in item.text.lower():
-                baños = item.text.split(' ')[2]
+        habitaciones, baños = self.find_rooms_and_bathrooms(resumen)
 
         return {
             'name'      : self.get_title(),
@@ -152,25 +164,46 @@ class AirbnbScraper(Driver):
     
     def get_links(self) -> list:
         self.load_page(self.depto_links)
-        datos = self.driver.find_elements(By.XPATH, "//a[contains(@href, '/rooms/')]")
-        print(f"Total de elementos encontrados: {len(datos)}")
-        billboard_links = []
-        for dato in datos:
-            try:
-                href = dato.get_attribute("href")
-                billboard_links.append(href)
-            except Exception as e:
-                print(f"Error: {e}")
-                continue
-        print(billboard_links)
+        wait = WebDriverWait(self.driver, 30)
+
+        SCROLL_PAUSE_TIME = 2
+        last_height = self.driver.execute_script("return document.body.scrollHeight")
+        links_set = set()
+
+        while True:
+            # Scroll hacia abajo
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            sleep(SCROLL_PAUSE_TIME)
+
+            # Obtener todos los elementos tipo /rooms/
+            elems = self.driver.find_elements(By.XPATH, "//a[contains(@href, '/rooms/')]")
+            for elem in elems:
+                href = elem.get_attribute("href")
+                if href and "/rooms/" in href:
+                    links_set.add(href)  # limpia parámetros
+
+            # Verificar si ya no hay más scroll
+            new_height = self.driver.execute_script("return document.body.scrollHeight")
+            if new_height == last_height:
+                break
+            last_height = new_height
+
+        billboard_links = list(links_set)
+        print(f"Total de links encontrados: {len(billboard_links)}")
         return billboard_links
+    
+    def get_all_data(self) -> list:
+        links = self.get_links()
+        all_data = []
+        for link in links:
+            data = self.get_data(link)
+            all_data.append(data)
+        return all_data
 
 
 if __name__ == '__main__':
     print('Scrap de una oferta ')
     scraper = AirbnbScraper()
-    data = scraper.get_data("https://www.airbnb.cl/rooms/1296471826558499503?search_mode=regular_search&adults=1&check_in=2025-05-26&check_out=2025-05-31&children=0&infants=0&pets=0&source_impression_id=p3_1747844899_P3tnZeHe4c7p52G7&previous_page_section_name=1000&federated_search_id=db2785f1-768e-404c-a79a-f8b06853e22f")
-    print(data)
-    data = scraper.get_data("https://www.airbnb.cl/rooms/1330590650199610252?search_mode=regular_search&adults=1&check_in=2025-05-21&check_out=2025-05-26&children=0&infants=0&pets=0&source_impression_id=p3_1747843939_P3JmVfVudOA9huWX&previous_page_section_name=1000&federated_search_id=3737772c-479b-4fcf-a032-39fa30acbdc0")
-    print(data)
+    all_data_airbnb = scraper.get_all_data()
+    print(all_data_airbnb)
     scraper.close()
