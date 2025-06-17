@@ -117,7 +117,7 @@ class AirbnbScraper(Driver):
                 
     def get_price(self) -> str:
         try:
-            wait = WebDriverWait(self.driver, 20)
+            wait = WebDriverWait(self.driver, 30)
             # Espera un span que contenga 'CLP' dentro de un botón
             spans = wait.until(EC.presence_of_all_elements_located((
                 By.XPATH, "//button//span[contains(text(), 'CLP')]"
@@ -125,7 +125,10 @@ class AirbnbScraper(Driver):
             
             for i, span in enumerate(spans):
                 if span.text and "CLP" in span.text:
+                    if span.text.strip() == "CLP":
+                        return "Precio no encontrado"
                     return span.text.strip()
+                
 
             return "Precio no encontrado"
         except Exception as e:
@@ -203,7 +206,7 @@ class AirbnbScraper(Driver):
 
 if __name__ == '__main__':
     print('Scrap de una oferta ')
-    scraper = PortalInmobiliarioScraper()
+    scraper = AirbnbScraper()
     all_data_portal = scraper.get_all_data()
     print(all_data_portal)
     scraper.close()
