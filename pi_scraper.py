@@ -44,8 +44,8 @@ class PortalInmobiliarioScraper(Driver):
         return {
             'name'      : self.get_title(),
             'type'      : 'departamento',
-            'rooms'     : int(self.get_rooms('dormitorios')[0]) if self.get_rooms('dormitorios')[0].isdigit() else -1, 
-            'bathrooms' : int(self.get_rooms('baños')[0]) if self.get_rooms('baños')[0].isdigit() else -1,
+            'rooms'     : int(self.get_rooms('dormitorios')[0]) if self.get_rooms('dormitorios')[0].isdigit() else 0, 
+            'bathrooms' : int(self.get_rooms('baños')[0]) if self.get_rooms('baños')[0].isdigit() else 0,
             'price'     : int(self.get_price().replace(".", "")),
             'location'  : self.get_location(),
             'description': self.get_description(),
