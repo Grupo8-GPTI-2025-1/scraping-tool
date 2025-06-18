@@ -137,4 +137,8 @@ class AirbnbScraper(Driver):
         links = self.get_links()
         print(f"Total de links a publicar: {len(links)}")
         for link in links:
-            self.post_airbnb(link)
+            try:
+                print(f"Publicando link: {link}")
+                self.post_airbnb(link)
+            except Exception as e:
+                print(f"Error al publicar {link}: {e}")
