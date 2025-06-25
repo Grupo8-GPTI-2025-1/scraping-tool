@@ -40,27 +40,27 @@ class PortalInmobiliarioScraper(Driver):
             print(f"[ERROR get_description]: {e}")
             return "Descripción no disponible"
         
-    def get_transport(self) -> str:
+    def get_transport(self) -> str: # /html/body/main/div[2]/div[4]/div/div[2]/div[2]/div[3]/div/div[3]/div/div[3]
         try:
-            element_tab = self.find_element(By.ID, ':R3sraac5e:-tab-content-0')
+            element_tab = self.find_element(By.CLASS_NAME, 'andes-tabs__container')
             m_elements = element_tab.find_element(
                 By.XPATH, 
-                value= f".//div[contains(., 'Estaciones de metro')]"
+                value= f"//div[contains(text(), 'Estaciones de metro')]"
                 ).find_elements(By.CLASS_NAME, 'ui-vip-poi__item-title')
             metros = [h.get_attribute('textContent') for h in m_elements]
         except Exception as e:
-            print(f"[No paraderos found]")
+            print(f"[No metros found]")
             metros = []
 
         try: 
-            element_tab = self.find_element(By.ID, ':R3sraac5e:-tab-content-0')
+            element_tab = self.find_element(By.CLASS_NAME, 'andes-tabs__container')
             p_elements = element_tab.find_element(
                 By.XPATH, 
-                value= f".//div[contains(., 'Paraderos')]"
+                value= f"//div[contains(., 'Paraderos')]"
                 ).find_elements(By.CLASS_NAME, 'ui-vip-poi__item-title')
             paraderos = [h.get_attribute('textContent') for h in p_elements]
         except Exception as e:
-            print(f"[No metros found]")
+            print(f"[No paraderos found]")
             paraderos = []
                 
         return {
@@ -145,8 +145,11 @@ class PortalInmobiliarioScraper(Driver):
 
 
 if __name__ == '__main__':
+    # portal_scraper = PortalInmobiliarioScraper()
+    # link = 'https://www.portalinmobiliario.com/MLC-2851992954-departamento-3destar-semi-nuevo-siena-las-condes-_JM'
+    # data = portal_scraper.get_data(link)
+    # portal_scraper.close()
+    # print(data)
+
     portal_scraper = PortalInmobiliarioScraper()
-    link = 'https://www.portalinmobiliario.com/MLC-2851992954-departamento-3destar-semi-nuevo-siena-las-condes-_JM'
-    data = portal_scraper.get_data(link)
-    portal_scraper.close()
-    print(data)
+    portal_scraper.post_portals()
