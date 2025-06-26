@@ -1,8 +1,9 @@
 # Scrapping-tool
 
 ## Consideraciones
-- Requiere que se instale selenium*: pip install selenium https://pypi.org/project/selenium/
-- Se requiere de un archivo ".env" que contiene la url del backend en el valor API_URL (http://backend:4000)
+- Requiere que la librería selenium esté instalada: `pip install selenium` (https://pypi.org/project/selenium/)
+- Se requiere que esté instalada la libreria python-dotenv: `pip install dotenv` (https://pypi.org/project/python-dotenv/)
+- Se requiere un archivo ".env" con la url del backend (http://backend:4000 para Docker) en la variable `API_URL`
 
 (Nota: Si el modulo de selenium no es reconocido en VSCODE https://stackoverflow.com/questions/71324949/import-selenium-could-not-be-resolved-pylance-reportmissingimports)
 
@@ -20,7 +21,3 @@ Clase padre de ambos scrapers, con los métodos necesarios para su correcto func
 
 ## post_module-py
 Módulo contenedor de funciones asociadas a la carga de datos a través del backend a la DB, a través de métodos post.
-
-Requiere que se instale selenium: https://pypi.org/project/selenium/
-
-Si el modulo no es reconocido: https://stackoverflow.com/questions/71324949/import-selenium-could-not-be-resolved-pylance-reportmissingimports
