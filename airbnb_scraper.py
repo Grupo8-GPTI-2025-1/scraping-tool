@@ -124,21 +124,21 @@ class AirbnbScraper(Driver):
             all_data.append(data)
         return all_data
     
-    def post_airbnb(self, link: str) -> None:
+    def post_airbnb(self, link: str, post_url: str) -> None:
         data = self.get_data(link)
         formatted_data = format_data(data, True)
         if formatted_data["rooms"] == 0 or formatted_data["price"] == 0:
             print(formatted_data)
             print(f"Error en la oferta: {link}")
             return
-        post_data([formatted_data], 'http://localhost:4000/airbnbs')
+        post_data([formatted_data], post_url)
 
-    def post_airbnbs(self) -> None:
+    def post_airbnbs(self, bdd_url: str) -> None:
         links = self.get_links()
         print(f"Total de links a publicar: {len(links)}")
         for link in links:
             try:
                 print(f"Publicando link: {link}")
-                self.post_airbnb(link)
+                self.post_airbnb(link, bdd_url + '/airbnbs')
             except Exception as e:
                 print(f"Error al publicar {link}: {e}")

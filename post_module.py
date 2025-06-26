@@ -17,7 +17,7 @@ def post_data(data, bdd_url):
         print("POST response no es JSON válido:")
         print(response.text)
 
-def format_data(data: dict, extras: bool=False):
+def format_data(data: dict, is_airbnb: bool=False):
     formatted_data = {    
         "name": data.get("name", "desconocido"),
         "property_type": data.get("type", "desconocido"),
@@ -29,10 +29,16 @@ def format_data(data: dict, extras: bool=False):
         "location": data.get("location", "sin informacion"),
 
     }
-    if extras:
+    if is_airbnb:
         extra_data = {
             "guests": data.get("guests", 1),
             "nights": data.get("nights", 5),
         } 
+        formatted_data.update(extra_data)
+    else:
+        extra_data = {
+            "coordinates": data.get("coordinates", "sin informacion"),
+            "transport": data.get("transport", "sin informacion"),
+        }
         formatted_data.update(extra_data)
     return formatted_data

@@ -38,6 +38,46 @@ class PortalInmobiliarioScraper(Driver):
         except Exception as e:
             print(f"[ERROR get_description]: {e}")
             return "Descripción no disponible"
+        
+    def get_transport(self) -> str: # /html/body/main/div[2]/div[4]/div/div[2]/div[2]/div[3]/div/div[3]/div/div[3]
+        try:
+            element_tab = self.find_element(By.CLASS_NAME, 'andes-tabs__container')
+            m_elements = element_tab.find_element(
+                By.XPATH, 
+                value= f"//div[contains(text(), 'Estaciones de metro')]"
+                ).find_elements(By.CLASS_NAME, 'ui-vip-poi__item-title')
+            metros = [h.get_attribute('textContent') for h in m_elements]
+        except Exception as e:
+            print(f"[No metros found]")
+            metros = []
+
+        try: 
+            element_tab = self.find_element(By.CLASS_NAME, 'andes-tabs__container')
+            p_elements = element_tab.find_element(
+                By.XPATH, 
+                value= f"//div[contains(., 'Paraderos')]"
+                ).find_elements(By.CLASS_NAME, 'ui-vip-poi__item-title')
+            paraderos = [h.get_attribute('textContent') for h in p_elements]
+        except Exception as e:
+            print(f"[No paraderos found]")
+            paraderos = []
+                
+        return {
+            'Paraderos': paraderos,
+            'Metros': metros
+        }        
+    
+    def get_coordinates(self):
+        try:
+            mapa = self.find_element(By.XPATH, '//div[@id="ui-vip-location__map"]/div/img')
+            coords = mapa.get_attribute("src").split('center=')[1].split('&')[0].split('%2C')
+        except Exception as e:
+            print(f"[ERROR get_coordinates]: {e}")
+            coords = ['desconocido','desconocido']
+        return {
+            'long': coords[0],
+            'lat': coords[1]
+        }    
 
     def get_data(self, link:str) -> dict:
         self.load_page(link)
@@ -49,7 +89,9 @@ class PortalInmobiliarioScraper(Driver):
             'price'     : int(self.get_price().replace(".", "")),
             'location'  : self.get_location(),
             'description': self.get_description(),
-            'url'       : link.split('#')[0]
+            'url'       : link.split('#')[0],
+            'transport' : self.get_transport(),
+            'coordinates': self.get_coordinates()
         }
     
     def get_links_from_one_page(self, link: str) -> list:
@@ -72,7 +114,6 @@ class PortalInmobiliarioScraper(Driver):
     def get_links(self) -> list:
         billboard_links = []
         billboard_links += self.get_links_from_one_page(self.depto_links)
-        #billboard_links += self.get_links_from_one_page(self.depto_links_pag_2)
         return billboard_links
     
     def get_all_data(self) -> list:
@@ -83,20 +124,34 @@ class PortalInmobiliarioScraper(Driver):
             all_data.append(data)
         return all_data
     
-    def post_portal(self, link: str) -> None:
+    def post_portal(self, link: str, post_url: str) -> None:
         data = self.get_data(link)
         formatted_data = format_data(data, False)
         if formatted_data["rooms"] == 0 or formatted_data["price"] == 0:
             print(f"Error en la oferta: {link}")
             return
-        post_data([formatted_data], 'http://localhost:4000/properties')
+        post_data([formatted_data], post_url)
 
-    def post_portals(self) -> None:
+    def post_portals(self, bdd_url: str) -> None:
         links = self.get_links()
         print(f"Total de links a publicar: {len(links)}")
         for link in links:
             try:
                 print(f"Publicando link: {link}")
-                self.post_portal(link)
+                self.post_portal(link, bdd_url + 'properties')
             except Exception as e:
                 print(f"Error al publicar {link}: {e}")
+
+
+if __name__ == '__main__':
+    import os
+    from dotenv import load_dotenv
+    load_dotenv()
+    # portal_scraper = PortalInmobiliarioScraper()
+    # link = 'https://www.portalinmobiliario.com/MLC-2851992954-departamento-3destar-semi-nuevo-siena-las-condes-_JM'
+    # data = portal_scraper.get_data(link)
+    # portal_scraper.close()
+    # print(data)
+
+    portal_scraper = PortalInmobiliarioScraper()
+    portal_scraper.post_portals(os.getenv("API_URL"))
