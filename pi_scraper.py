@@ -2,7 +2,6 @@ from driver import Driver
 from selenium.webdriver.common.by import By
 from time import sleep
 from post_module import post_data, format_data
-import re
 
 
 class PortalInmobiliarioScraper(Driver):
@@ -125,26 +124,29 @@ class PortalInmobiliarioScraper(Driver):
             all_data.append(data)
         return all_data
     
-    def post_portal(self, link: str) -> None:
+    def post_portal(self, link: str, post_url: str) -> None:
         data = self.get_data(link)
         formatted_data = format_data(data, False)
         if formatted_data["rooms"] == 0 or formatted_data["price"] == 0:
             print(f"Error en la oferta: {link}")
             return
-        post_data([formatted_data], 'http://localhost:4000/properties')
+        post_data([formatted_data], post_url)
 
-    def post_portals(self) -> None:
+    def post_portals(self, bdd_url: str) -> None:
         links = self.get_links()
         print(f"Total de links a publicar: {len(links)}")
         for link in links:
             try:
                 print(f"Publicando link: {link}")
-                self.post_portal(link)
+                self.post_portal(link, bdd_url + 'properties')
             except Exception as e:
                 print(f"Error al publicar {link}: {e}")
 
 
 if __name__ == '__main__':
+    import os
+    from dotenv import load_dotenv
+    load_dotenv()
     # portal_scraper = PortalInmobiliarioScraper()
     # link = 'https://www.portalinmobiliario.com/MLC-2851992954-departamento-3destar-semi-nuevo-siena-las-condes-_JM'
     # data = portal_scraper.get_data(link)
@@ -152,4 +154,4 @@ if __name__ == '__main__':
     # print(data)
 
     portal_scraper = PortalInmobiliarioScraper()
-    portal_scraper.post_portals()
+    portal_scraper.post_portals(os.getenv("API_URL"))
